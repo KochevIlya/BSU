@@ -2,6 +2,7 @@ package com.example.quiz;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 TextView totalQuestionsTextView;
 int score=0;
-int totalQuestions=QuestionAnswer.question.length;
+int totalQuestions=QuestionAnswer.choices.length;
 TextView questionTextView;
 int currentQuestionIndex=0;
 String selectedAnswer = "";
@@ -51,6 +52,7 @@ Button submitBtn;
                 score++;
             }
             currentQuestionIndex++;
+            //can't load the question throw the exception
             loadNewQuestion();
         }
         else{
@@ -62,17 +64,21 @@ Button submitBtn;
             clickedButton.setBackgroundColor(Color.BLUE);
         }
     }
+    //can't open the dialogue window in the end
     void loadNewQuestion(){
+
+        if (currentQuestionIndex==totalQuestions){
+            FinishQuiz();
+            return;
+        }
         questionTextView.setText(QuestionAnswer.question[currentQuestionIndex]);
         ansA.setText(QuestionAnswer.choices[currentQuestionIndex][0]);
         ansB.setText(QuestionAnswer.choices[currentQuestionIndex][1]);
         ansC.setText(QuestionAnswer.choices[currentQuestionIndex][2]);
         ansD.setText(QuestionAnswer.choices[currentQuestionIndex][3]);
-        if (currentQuestionIndex==totalQuestions){
-        FinishQuiz();
-        return;
-        }
+
     }
+    @SuppressLint("SuspiciousIndentation")
     void FinishQuiz(){
         String results="";
         if(score>totalQuestions*0.60){

@@ -50,7 +50,10 @@ public class QuestionAnswer {
             "Vodka, coffee liqueur, cream/milk",
             "Pretty Woman",
 
-            "Jane Seymour",},{
+            "Jane Seymour",
+
+            "Pretty Woman",
+    },{
 
             "Claude Monet",
             "Pretty Woman",
