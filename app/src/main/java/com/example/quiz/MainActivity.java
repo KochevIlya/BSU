@@ -21,9 +21,7 @@ Button ansB;
 Button ansC;
 Button ansD;
 Button submitBtn;
-
-
-    @Override
+@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -35,17 +33,16 @@ Button submitBtn;
         ansD=findViewById(R.id.ans_4);
         submitBtn=findViewById(R.id.submit);
         totalQuestionsTextView.setText("Total Questions : "+totalQuestions);
-
-        loadNewQuestion();
-    }
-
-    @Override
-    public void onClick(View v) {
         ansA.setOnClickListener(this);
         ansB.setOnClickListener(this);
         ansC.setOnClickListener(this);
         ansD.setOnClickListener(this);
         submitBtn.setOnClickListener(this);
+        loadNewQuestion();
+    }
+
+    @Override
+    public void onClick(View v) {
 
         Button clickedButton=(Button) v;
 
@@ -55,8 +52,6 @@ Button submitBtn;
             }
             currentQuestionIndex++;
             loadNewQuestion();
-
-
         }
         else{
             selectedAnswer=clickedButton.getText().toString();
