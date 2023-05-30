@@ -1,13 +1,14 @@
 package com.example.quiz;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -76,6 +77,10 @@ Button submitBtn;
         ansB.setText(QuestionAnswer.choices[currentQuestionIndex][1]);
         ansC.setText(QuestionAnswer.choices[currentQuestionIndex][2]);
         ansD.setText(QuestionAnswer.choices[currentQuestionIndex][3]);
+        ansA.setBackgroundColor(Color.WHITE);
+        ansB.setBackgroundColor(Color.WHITE);
+        ansC.setBackgroundColor(Color.WHITE);
+        ansD.setBackgroundColor(Color.WHITE);
 
     }
     @SuppressLint("SuspiciousIndentation")
@@ -86,14 +91,19 @@ Button submitBtn;
         }
         else
         results ="You can always do better";
-        new AlertDialog.Builder(this).setTitle(results).setMessage("Your score is:"+ score+"out of"+ totalQuestions)
-                .setPositiveButton("Restart",(dialogueInterface,i)->restartQuiz());
-    }
+        openDialogue(results);
+
+
+}
     void restartQuiz()
     {
         score=0;
         currentQuestionIndex=0;
         loadNewQuestion();
     }
+    void openDialogue( String results){
+        ExampleDialogue exampleDialogue =new ExampleDialogue(results);
+        exampleDialogue.show(getSupportFragmentManager(),"Example dialogue");
 
+    }
 }
