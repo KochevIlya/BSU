@@ -70,6 +70,7 @@ Button submitBtn;
 
         if (currentQuestionIndex==totalQuestions){
             FinishQuiz();
+            restartQuiz();
             return;
         }
         questionTextView.setText(QuestionAnswer.question[currentQuestionIndex]);
@@ -90,7 +91,7 @@ Button submitBtn;
             results="You did well";
         }
         else
-        results ="You can always do better";
+        results ="You can always do better)";
         openDialogue(results);
 
 
@@ -102,7 +103,7 @@ Button submitBtn;
         loadNewQuestion();
     }
     void openDialogue( String results){
-        ExampleDialogue exampleDialogue =new ExampleDialogue(results);
+        ExampleDialogue exampleDialogue =new ExampleDialogue(results,score);
         exampleDialogue.show(getSupportFragmentManager(),"Example dialogue");
 
     }

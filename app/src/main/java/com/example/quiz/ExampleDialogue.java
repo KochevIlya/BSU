@@ -11,15 +11,16 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 public class ExampleDialogue extends AppCompatDialogFragment {
     public String results="";
-    public ExampleDialogue(String results) {
-        this.results=results;
+    public int score=0;
+    public ExampleDialogue(String results,int score) {
+        this.results=results;this.score=score;
     }
 
     @Override
     @NonNull
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder=new AlertDialog.Builder(getActivity());
-        builder.setTitle("information").setMessage(results).setPositiveButton("ok", new DialogInterface.OnClickListener() {
+        builder.setTitle("information").setMessage("Your score is: "+score+"\n"+results).setPositiveButton("Try again", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }
