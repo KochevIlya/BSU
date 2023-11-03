@@ -1,2 +1,2 @@
 # BSU
-This repository consists of that lessons and projects, that intended to my University studies
+This repository consists of the lessons and projects, that intended to my University studies
