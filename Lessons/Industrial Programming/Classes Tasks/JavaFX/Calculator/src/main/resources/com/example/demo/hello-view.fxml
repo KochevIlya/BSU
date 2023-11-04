@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+
+<?import javafx.scene.text.Text?>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" fx:controller="com.example.demo.Controller" minWidth="-Infinity" prefHeight="400.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <StackPane prefHeight="150.0" prefWidth="200.0">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#cfcfcf" height="100.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+            <Text fx:id = "output"/>
+         </children>
+      </StackPane>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="7" />
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="8" />
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="9" />
+            <Button mnemonicParsing="false" onAction="#workWithOperators" prefHeight="50.0" prefWidth="50.0" text="/" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="4" />
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="5" />
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="6" />
+            <Button mnemonicParsing="false" onAction="#workWithOperators" prefHeight="50.0" prefWidth="50.0" text="*" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="1" />
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="2" />
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="50.0" text="3" />
+            <Button mnemonicParsing="false" onAction="#workWithOperators" prefHeight="50.0" prefWidth="50.0" text="+" />
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#workWithNumbers" prefHeight="50.0" prefWidth="100.0" text="0" />
+            <Button mnemonicParsing="false" onAction="#workWithOperators" prefHeight="50.0" prefWidth="50.0" text="=" />
+            <Button mnemonicParsing="false" onAction="#workWithOperators" prefHeight="50.0" prefWidth="50.0" text="-" />
+         </children>
+      </HBox>
+
+   </children>
+</VBox>
