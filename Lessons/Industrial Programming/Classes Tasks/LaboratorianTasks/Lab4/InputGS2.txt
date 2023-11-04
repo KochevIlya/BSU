@@ -1,0 +1,22 @@
+Sasha
+12
+1
+9 Math
+10 English
+9 History
+9 Programming
+10 Russian
+********************************************
+2
+8 Math
+10 English
+5 History
+9 Programming
+8 Russian
+********************************************
+3
+8 Math
+10 English
+5 History
+9 Programming
+8 Russian

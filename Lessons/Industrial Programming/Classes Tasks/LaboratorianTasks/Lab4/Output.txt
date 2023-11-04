@@ -1,0 +1,36 @@
+6
+Ilya
+Math 5 
+English 4 
+History 8 
+Programming 9 
+Russian 4 
+
+Keril
+Math 7 
+English 5 
+History 8 
+Programming 4 
+Russian 7 
+
+Petya
+Math 9 
+English 4 
+History 5 
+Programming 7 
+Russian 5 
+
+Sasha
+Math 9 
+English 10 
+History 9 
+Programming 9 
+Russian 10 
+
+Fridrich
+Math 8 
+English 10 
+History 5 
+Programming 9 
+Russian 8 
+
