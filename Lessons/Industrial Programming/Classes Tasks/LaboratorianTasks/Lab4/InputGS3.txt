@@ -1,0 +1,22 @@
+Nastya
+12345
+1
+5 Math
+9 English
+6 History
+9 Programming
+5 Russian
+********************************************
+2
+9 Math
+7 English
+7 History
+5 Programming
+6 Russian
+********************************************
+3
+8 Math
+9 English
+6 History
+7 Programming
+7 Russian

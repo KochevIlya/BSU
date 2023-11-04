@@ -1,0 +1,22 @@
+Ilya
+1234
+1
+5 Math
+4 English
+8 History
+9 Programming
+4 Russian
+********************************************
+2
+5 Math
+7 English
+6 History
+8 Programming
+8 Russian
+********************************************
+3
+9 Math
+4 English
+5 History
+7 Programming
+5 Russian
