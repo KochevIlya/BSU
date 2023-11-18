@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.newyear.HelloController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="167.0" minWidth="10.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="291.0" minWidth="10.0" prefWidth="150.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="160.0" minHeight="10.0" prefHeight="59.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="280.0" minHeight="10.0" prefHeight="239.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+  <children>
+    <Label text="Производитель" />
+    <ComboBox fx:id="manufacturerComboBox" prefWidth="150.0" GridPane.columnIndex="1">
+      <items>
+        <FXCollections fx:factory="observableArrayList">
+          <String fx:value="Производитель 1" />
+          <String fx:value="Производитель 2" />
+        </FXCollections>
+      </items>
+    </ComboBox>
+    <Label text="Подарок" GridPane.rowIndex="1" />
+    <ComboBox fx:id="giftComboBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <items>
+        <FXCollections fx:factory="observableArrayList">
+          <String fx:value="Подарок 1" />
+          <String fx:value="Подарок 2" />
+        </FXCollections>
+      </items>
+    </ComboBox>
+    <Label text="Концерт" GridPane.rowIndex="2" />
+    <CheckBox fx:id="concertCheckBox" mnemonicParsing="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+    <Label text="Постоянный клиент" GridPane.rowIndex="3" />
+    <CheckBox fx:id="regularCustomerCheckBox" mnemonicParsing="false" onAction="#handleCustumer" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+    <Label fx:id="NameCost" text="Стоимость поздравления: " GridPane.rowIndex="4"/>
+    <Label fx:id="costLabel" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+  </children>
+</GridPane>
