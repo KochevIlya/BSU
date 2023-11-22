@@ -79,17 +79,18 @@ public class HelloController {
     {
         if (wholeCost != 0.0 || selectedGift == null)
         {
-            for(int i = 0; i < DBConnector.count; i++)
+            for(int i = 0; i < DBConnector.factoryList.get(newIndex).giftsAmount; i++)
             {
                 if(Objects.equals(DBConnector.factoryList.get(newIndex).giftsList.get(i).name, oldGift))
                     wholeCost -= DBConnector.factoryList.get(newIndex).giftsList.get(i).cost * kof;
             }
         }
-        for(int i = 0; i < DBConnector.count; i++)
+        for(int i = 0; i < DBConnector.factoryList.get(newIndex).giftsAmount; i++)
         {
             if(Objects.equals(DBConnector.factoryList.get(newIndex).giftsList.get(i).name, selectedGift))
                 wholeCost += DBConnector.factoryList.get(newIndex).giftsList.get(i).cost * kof;
         }
+
         costLabel.setText(Double.toString(wholeCost));
     }
 }
