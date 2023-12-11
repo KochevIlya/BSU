@@ -39,11 +39,13 @@ using namespace std;
 	DWORD dwBytesWritten; // для числа записанных байтов
 	char lpszInMessage[80]; // для сообщения от сервера
 	DWORD dwBytesRead; // для числа прочитанных байтов
-
+	int index;
 int pipeConnecting()
 {
+	std::wstring pipeName = L"\\\\.\\pipe\\demo_pipe" + std::to_wstring(index);
+	std::wcout << pipeName<< "\n";
 	hNamedPipe = CreateFile(
-		L"\\\\.\\pipe\\demo_pipe", // имя канала
+		pipeName.c_str(), // имя канала
 		GENERIC_READ | GENERIC_WRITE, // читаем и записываем в канал
 		FILE_SHARE_READ | FILE_SHARE_WRITE, // разрешаем чтение и запись в канал
 		(LPSECURITY_ATTRIBUTES)NULL, // защита по умолчанию
@@ -137,12 +139,13 @@ int createRequest(const int num, const int id)
 	return 0;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+	index = atoi(argv[1]);
 	// связываемся с именованным каналом
 	if (pipeConnecting() == 1)
 		return 0;
-
+	
 	while (true)
 	{
 		//Выбираем опцию

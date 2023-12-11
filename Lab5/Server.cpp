@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <iostream>
+#include <string>
 using namespace std;
 
 struct employee
@@ -14,22 +15,29 @@ struct employee
 char c; // служебный символ
 SECURITY_ATTRIBUTES sa; // атрибуты защиты
 SECURITY_DESCRIPTOR sd; // дескриптор защиты
-HANDLE hNamedPipe;
+STARTUPINFO startupInfo;
 char lpszInMessage[80]; // для сообщения от клиента
 DWORD dwBytesRead; // для числа прочитанных байтов
 char lpszOutMessage[] = "The server has received a message."; // обратное сообщение
 DWORD dwBytesWrite; // для числа записанных байтов
 int processAmount;
-STARTUPINFO startupInfo;
 PROCESS_INFORMATION processInfo;
 HANDLE* processHandles;
+const wchar_t* pipeNameBase = L"\\\\.\\pipe\\demo_pipe";
+HANDLE* hNamedPipes;
+
 
 
 
 int creatingPipe()
 {
-		hNamedPipe = CreateNamedPipe(
-			L"\\\\.\\pipe\\demo_pipe", // имя канала
+	hNamedPipes = new HANDLE[processAmount];
+	for (int i = 0; i < processAmount; i++)
+	{
+		std::wstring pipeName = pipeNameBase + std::to_wstring(i);
+		std::wcout << pipeName << "\n";
+		hNamedPipes[i] = CreateNamedPipe(
+			pipeName.c_str(), // имя канала
 			PIPE_ACCESS_DUPLEX, // читаем из канала и пишем в канал
 			PIPE_TYPE_MESSAGE | PIPE_WAIT, // синхронная передача сообщений
 			PIPE_UNLIMITED_INSTANCES, // максимальное количество экземпляров канала
@@ -39,7 +47,7 @@ int creatingPipe()
 			&sa // доступ для всех пользователей
 		);
 
-		if (hNamedPipe == INVALID_HANDLE_VALUE)
+		if (hNamedPipes[i] == INVALID_HANDLE_VALUE)
 		{
 			cerr << "Creation of the named pipe failed." << endl
 				<< "The last error code: " << GetLastError() << endl;
@@ -47,26 +55,29 @@ int creatingPipe()
 			cin >> c;
 			return 1;
 		}
+	}
 	return 0;
 }
 
 int waitingClient()
 {
+	for (int i = 0; i < processAmount; i++)
+	{
 		if (!ConnectNamedPipe(
 
-			hNamedPipe, // дескриптор канала
+			hNamedPipes[i], // дескриптор канала
 			(LPOVERLAPPED)NULL // связь синхронная
 		))
 		{
 			cerr << "The connection failed." << endl
 				<< "The last error code: " << GetLastError() << endl;
-			CloseHandle(hNamedPipe);
+			CloseHandle(hNamedPipes[i]);
 			cout << "Press any char to finish the server: ";
 			cin >> c;
 			return 1;
 		}
 		return 0;
-	
+	}
 }
 
 int creatingProcess()
@@ -74,10 +85,12 @@ int creatingProcess()
 	ZeroMemory(&startupInfo, sizeof(startupInfo));
 	startupInfo.cb = sizeof(startupInfo);
 	ZeroMemory(&sa, sizeof(SECURITY_ATTRIBUTES));
-	std::wstring command = L"Client.exe";
 	processHandles = new HANDLE[processAmount];
 	for (int i = 0; i < processAmount; i++)
 	{
+		std::wstring command = L"Client.exe ";
+		command += std::to_wstring(i);
+
 		if (!CreateProcess(NULL, &command[0], &sa, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &startupInfo, &processInfo))
 		{
 			std::cerr << "Failed to create a Client process." << std::endl;
@@ -90,7 +103,7 @@ int creatingProcess()
 	return 0;
 }
 
-int readingMessage()
+int readingMessage(HANDLE hNamedPipe)
 {
 	if (!ReadFile(
 
@@ -112,7 +125,7 @@ int readingMessage()
 	return 0;
 }
 
-int writingMessage()
+int writingMessage(HANDLE hNamedPipe)
 {
 	if (!WriteFile(
 
@@ -157,12 +170,13 @@ int main()
 	sa.lpSecurityDescriptor = &sd;
 
 	// создаем именованный канал для чтения
+	cout << "Enter the amount of procces Clients: ";
+	cin >> processAmount;
+
 	if (creatingPipe() == 1)
 		return 0;
 	
 	//Cоздаём процессы клиентов
-	cout << "Enter the amount of procces Clients: ";
-	cin >> processAmount;
 	if (creatingProcess() == 1)
 		return 0;
 
@@ -173,10 +187,12 @@ int main()
 		return 0;
 	cout << "Connected\n";
 
+
+	//Работаем, пока все процессы не закроются.
 	while (true)
 	{
 		// читаем сообщение от клиента
-		if (readingMessage() == 1)
+		if (readingMessage(hNamedPipes[0]) == 1)
 			return 0;
 		if (requestProcessing() == 1)
 			return 0;
@@ -187,7 +203,7 @@ int main()
 
 
 		// отвечаем клиенту
-		if (writingMessage() == 1)
+		if (writingMessage(hNamedPipes[0]) == 1)
 			return 0;
 
 		// выводим посланное клиенту сообщение на консоль
@@ -196,8 +212,11 @@ int main()
 
 	}
 	// закрываем дескриптор канала
-	CloseHandle(hNamedPipe);
-	
+	for (int i = 0; i < processAmount; i++)
+	{
+
+		CloseHandle(hNamedPipes[i]);
+	}
 	// завершаем процесс
 	cout << "Press any char to finish the server: ";
 	cin >> c;
