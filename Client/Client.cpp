@@ -62,6 +62,7 @@ int pipeConnecting()
 		cin >> c;
 		return 1;
 	}
+	std::cout << "Connected\n";
 	return 0;
 }
 

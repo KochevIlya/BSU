@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <iostream>
 #include <string>
+#include "Header.h";
 using namespace std;
 
 struct employee
@@ -9,14 +10,28 @@ struct employee
 	char name[10];
 	double hours;
 };
+struct Command
+{
+	int id;
+	int request;
 
+	std::string convert()
+	{
+		std::string str = std::to_string(request) + " " + std::to_string(id);
+		return  str;
+	};
+	Command()
+	{
+		this->id = -1;
+		this->request = 0;
+	}
+};
 
 
 char c; // служебный символ
 SECURITY_ATTRIBUTES sa; // атрибуты защиты
 SECURITY_DESCRIPTOR sd; // дескриптор защиты
 STARTUPINFO startupInfo;
-char lpszInMessage[80]; // дл€ сообщени€ от клиента
 DWORD dwBytesRead; // дл€ числа прочитанных байтов
 char lpszOutMessage[] = "The server has received a message."; // обратное сообщение
 DWORD dwBytesWrite; // дл€ числа записанных байтов
@@ -25,6 +40,7 @@ PROCESS_INFORMATION processInfo;
 HANDLE* processHandles;
 const wchar_t* pipeNameBase = L"\\\\.\\pipe\\demo_pipe";
 HANDLE* hNamedPipes;
+HANDLE* hThreads;
 
 
 
@@ -51,33 +67,12 @@ int creatingPipe()
 		{
 			cerr << "Creation of the named pipe failed." << endl
 				<< "The last error code: " << GetLastError() << endl;
-			cout << "Press any char to finish server: ";
-			cin >> c;
+			std::cout << "Press any char to finish server: ";
+			std::cin >> c;
 			return 1;
 		}
 	}
 	return 0;
-}
-
-int waitingClient()
-{
-	for (int i = 0; i < processAmount; i++)
-	{
-		if (!ConnectNamedPipe(
-
-			hNamedPipes[i], // дескриптор канала
-			(LPOVERLAPPED)NULL // св€зь синхронна€
-		))
-		{
-			cerr << "The connection failed." << endl
-				<< "The last error code: " << GetLastError() << endl;
-			CloseHandle(hNamedPipes[i]);
-			cout << "Press any char to finish the server: ";
-			cin >> c;
-			return 1;
-		}
-		return 0;
-	}
 }
 
 int creatingProcess()
@@ -103,6 +98,36 @@ int creatingProcess()
 	return 0;
 }
 
+int waitingClient(HANDLE hNamedPipe)
+{
+		if (!ConnectNamedPipe(
+
+			hNamedPipe, // дескриптор канала
+			(LPOVERLAPPED)NULL // св€зь синхронна€
+		))
+		{
+			cerr << "The connection failed." << endl
+				<< "The last error code: " << GetLastError() << endl;
+			CloseHandle(hNamedPipe);
+			std::cout << "Press any char to finish the server: ";
+			std::cin >> c;
+			return 1;
+		}
+		return 0;
+}
+
+int creatingThreads()
+{	
+	DWORD* IDThreads = new DWORD[processAmount];
+	hThreads = new HANDLE[processAmount];
+	for (int i = 0; i < processAmount; i++)
+	{
+		std::cout << "Creating Thread\n";
+		hThreads[i] = CreateThread(&sa, 0, (LPTHREAD_START_ROUTINE)processingThread, (void*)i, 0, &IDThreads[i]);
+	}
+	return 0;
+}
+
 int readingMessage(HANDLE hNamedPipe)
 {
 	if (!ReadFile(
@@ -118,8 +143,8 @@ int readingMessage(HANDLE hNamedPipe)
 			<< "The last error code: " << GetLastError() << endl;
 
 		CloseHandle(hNamedPipe);
-		cout << "Press any char to finish the server: ";
-		cin >> c;
+		std::cout << "Press any char to finish the server: ";
+		std::cin >> c;
 		return 1;
 	}
 	return 0;
@@ -139,8 +164,8 @@ int writingMessage(HANDLE hNamedPipe)
 		cerr << "Data writing to the named pipe failed." << endl
 			<< "The last error code: " << GetLastError() << endl;
 		CloseHandle(hNamedPipe);
-		cout << "Press any char to finish the server: ";
-		cin >> c;
+		std::cout << "Press any char to finish the server: ";
+		std::cin >> c;
 		return 1;
 	}
 	return 0;
@@ -151,6 +176,7 @@ int requestProcessing()
 
 	return 0;
 }
+
 
 
 int main()
@@ -170,8 +196,8 @@ int main()
 	sa.lpSecurityDescriptor = &sd;
 
 	// создаем именованный канал дл€ чтени€
-	cout << "Enter the amount of procces Clients: ";
-	cin >> processAmount;
+	std::cout << "Enter the amount of procces Clients: ";
+	std::cin >> processAmount;
 
 	if (creatingPipe() == 1)
 		return 0;
@@ -180,45 +206,18 @@ int main()
 	if (creatingProcess() == 1)
 		return 0;
 
-
-	// ждем, пока клиент св€жетс€ с каналом
-	cout << "The server is waiting for connection with a client." << endl;
-	if (waitingClient() == 1)
+	std::cout << "Connected\n";
+	if (creatingThreads() == 1)
 		return 0;
-	cout << "Connected\n";
-
-
-	//–аботаем, пока все процессы не закроютс€.
-	while (true)
-	{
-		// читаем сообщение от клиента
-		if (readingMessage(hNamedPipes[0]) == 1)
-			return 0;
-		if (requestProcessing() == 1)
-			return 0;
-
-		// выводим полученное от клиента сообщение на консоль
-		cout << "The server has receivrd the following message from a client: "
-			<< endl << "\t" << lpszInMessage << endl;
-
-
-		// отвечаем клиенту
-		if (writingMessage(hNamedPipes[0]) == 1)
-			return 0;
-
-		// выводим посланное клиенту сообщение на консоль
-		cout << "The server send the following message to a client: "
-			<< endl << "\t" << lpszOutMessage << endl;
-
-	}
+	WaitForMultipleObjects(processAmount, hThreads, TRUE, INFINITE);
+	std::cout << "CLosing the Threads\n";
 	// закрываем дескриптор канала
 	for (int i = 0; i < processAmount; i++)
 	{
-
 		CloseHandle(hNamedPipes[i]);
 	}
 	// завершаем процесс
-	cout << "Press any char to finish the server: ";
-	cin >> c;
+	std::cout << "Press any char to finish the server: ";
+	std::cin >> c;
 	return 0;
 }
