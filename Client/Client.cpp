@@ -1,19 +1,44 @@
-#include <windows.h>
+#include <Windows.h>
 #include <iostream>
+#include <string>
 
 #pragma warning (disable : 4996)
+
+struct employee
+{
+	int id;
+	char name[10];
+	double hours;
+};
+
+struct Command
+{
+	int id;
+	int request;
+
+	std::string convert()
+	{
+		std::string str = std::to_string(request) + " " + std::to_string(id);
+		return  str;
+	};
+	Command()
+	{
+		this->id = -1;
+		this->request = 0;
+	}
+};
 
 
 using namespace std;
 
-char c; // служебный символ
-HANDLE hNamedPipe;
-char machineName[80];
-char pipeName[80];
-char lpszOutMessage[] = "How do you do server?"; // сообщение серверу
-DWORD dwBytesWritten; // для числа записанных байтов
-char lpszInMessage[80]; // для сообщения от сервера
-DWORD dwBytesRead; // для числа прочитанных байтов
+	char c; // служебный символ
+	HANDLE hNamedPipe;
+	char machineName[80];
+	char pipeName[80];
+	char lpszOutMessage[] = "How do you do server?"; // сообщение серверу
+	DWORD dwBytesWritten; // для числа записанных байтов
+	char lpszInMessage[80]; // для сообщения от сервера
+	DWORD dwBytesRead; // для числа прочитанных байтов
 
 int pipeConnecting()
 {
@@ -83,15 +108,26 @@ int readingMessage()
 	return 0;
 }
 
-int createRequest(const int num)
+int createRequest(const int num, const int id)
 {
+	Command command = Command();
+	std::string	str = "";
 	switch (num)
 	{
 	case 1:
-		strcpy(lpszOutMessage, "Writing");
+		command.request = 1;
+		command.id = id;
+		str = command.convert();
+		strcpy(lpszOutMessage, str.c_str());
+		std::cout << "Converted command: " << command.convert() << "\n";
+		std::cout << lpszOutMessage << "\n";
 		break;
 	case 2:
-		strcpy(lpszOutMessage, "Reading");
+		command.request = 2;
+		command.id = id;
+		str = command.convert();
+		strcpy(lpszOutMessage, str.c_str());
+		std::cout << lpszOutMessage << "\n";
 		break;
 	default:
 		std::cout << "Something went wrong\n";
@@ -113,28 +149,37 @@ int main()
 		cout << "Enter the option: \n1. Modify\n2. Read\n3. Quit\nYour option: ";
 
 		cin >> c;
+		int id;
 		switch (c)
-		{
-		case '1':
+		{	
 			// пишем в именованный канал
-			if (createRequest(1) == 1)
+		case '1':
+			
+			std::cout << "Enter the id of Employee that you want to change: ";
+			std::cin >> id;
+			if (createRequest(1, id) == 1)
 				return 0;
 			if (writingMessage() == 1)
 				return 0;
 			if (readingMessage() == 1)
 				return 0;
 			break;
+		
+
+
+		// читаем из именованного канала
 		case '2':
-			// читаем из именованного канала
+			std::cout << "Enter the id of Employee that you want to read: ";
+			std::cin >> id;
+
 			cout << "Waiting Server response\n";
-			if (createRequest(2) == 1)
+			if (createRequest(2, id) == 1)
 				return 0;
 			if (writingMessage() == 1)
 				return 0;
 			if (readingMessage() == 1)
 				return 0;
 
-			
 			// выводим полученное сообщение на консоль
 			cout << "The client has received the following message from a server: "
 				<< endl << "\t" << lpszInMessage << endl;

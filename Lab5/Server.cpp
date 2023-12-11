@@ -2,6 +2,15 @@
 #include <iostream>
 using namespace std;
 
+struct employee
+{
+	int id;
+	char name[10];
+	double hours;
+};
+
+
+
 char c; // служебный символ
 SECURITY_ATTRIBUTES sa; // атрибуты защиты
 SECURITY_DESCRIPTOR sd; // дескриптор защиты
@@ -19,44 +28,45 @@ HANDLE* processHandles;
 
 int creatingPipe()
 {
-	hNamedPipe = CreateNamedPipe(
-		L"\\\\.\\pipe\\demo_pipe", // им€ канала
-		PIPE_ACCESS_DUPLEX, // читаем из канала и пишем в канал
-		PIPE_TYPE_MESSAGE | PIPE_WAIT, // синхронна€ передача сообщений
-		1, // максимальное количество экземпл€ров канала
-		0, // размер выходного буфера по умолчанию
-		0, // размер входного буфера по умолчанию
-		INFINITE, // клиент ждет св€зь 500 мс
-		&sa // доступ дл€ всех пользователей
-	);
+		hNamedPipe = CreateNamedPipe(
+			L"\\\\.\\pipe\\demo_pipe", // им€ канала
+			PIPE_ACCESS_DUPLEX, // читаем из канала и пишем в канал
+			PIPE_TYPE_MESSAGE | PIPE_WAIT, // синхронна€ передача сообщений
+			PIPE_UNLIMITED_INSTANCES, // максимальное количество экземпл€ров канала
+			0, // размер выходного буфера по умолчанию
+			0, // размер входного буфера по умолчанию
+			INFINITE, // клиент ждет св€зь 500 мс
+			&sa // доступ дл€ всех пользователей
+		);
 
-	if (hNamedPipe == INVALID_HANDLE_VALUE)
-	{
-		cerr << "Creation of the named pipe failed." << endl
-			<< "The last error code: " << GetLastError() << endl;
-		cout << "Press any char to finish server: ";
-		cin >> c;
-		return 1;
-	}
+		if (hNamedPipe == INVALID_HANDLE_VALUE)
+		{
+			cerr << "Creation of the named pipe failed." << endl
+				<< "The last error code: " << GetLastError() << endl;
+			cout << "Press any char to finish server: ";
+			cin >> c;
+			return 1;
+		}
 	return 0;
 }
 
 int waitingClient()
 {
-	if (!ConnectNamedPipe(
+		if (!ConnectNamedPipe(
 
-		hNamedPipe, // дескриптор канала
-		(LPOVERLAPPED)NULL // св€зь синхронна€
-	))
-	{
-		cerr << "The connection failed." << endl
-			<< "The last error code: " << GetLastError() << endl;
-		CloseHandle(hNamedPipe);
-		cout << "Press any char to finish the server: ";
-		cin >> c;
-		return 1;
-	}
-	return 0;
+			hNamedPipe, // дескриптор канала
+			(LPOVERLAPPED)NULL // св€зь синхронна€
+		))
+		{
+			cerr << "The connection failed." << endl
+				<< "The last error code: " << GetLastError() << endl;
+			CloseHandle(hNamedPipe);
+			cout << "Press any char to finish the server: ";
+			cin >> c;
+			return 1;
+		}
+		return 0;
+	
 }
 
 int creatingProcess()
@@ -146,12 +156,6 @@ int main()
 	SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
 	sa.lpSecurityDescriptor = &sd;
 
-	HANDLE hAttentionEvent = CreateEvent(NULL, TRUE, FALSE, L"AttentionEvent");
-	if (hAttentionEvent == NULL) {
-		std::cerr << "Error creating named event: " << GetLastError() << std::endl;
-		return 1;
-	}
-
 	// создаем именованный канал дл€ чтени€
 	if (creatingPipe() == 1)
 		return 0;
@@ -168,6 +172,7 @@ int main()
 	if (waitingClient() == 1)
 		return 0;
 	cout << "Connected\n";
+
 	while (true)
 	{
 		// читаем сообщение от клиента
