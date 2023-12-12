@@ -35,11 +35,14 @@ using namespace std;
 	HANDLE hNamedPipe;
 	char machineName[80];
 	char pipeName[80];
-	char lpszOutMessage[] = "How do you do server?"; // сообщение серверу
+	char lpszOutMessage[80]; // сообщение серверу
 	DWORD dwBytesWritten; // для числа записанных байтов
 	char lpszInMessage[80]; // для сообщения от сервера
 	DWORD dwBytesRead; // для числа прочитанных байтов
 	int index;
+
+
+
 int pipeConnecting()
 {
 	std::wstring pipeName = L"\\\\.\\pipe\\demo_pipe" + std::to_wstring(index);
@@ -158,7 +161,6 @@ int main(int argc, char* argv[])
 		{	
 			// пишем в именованный канал
 		case '1':
-			
 			std::cout << "Enter the id of Employee that you want to change: ";
 			std::cin >> id;
 			if (createRequest(1, id) == 1)
@@ -187,6 +189,7 @@ int main(int argc, char* argv[])
 			// выводим полученное сообщение на консоль
 			cout << "The client has received the following message from a server: "
 				<< endl << "\t" << lpszInMessage << endl;
+
 			break;
 		case '3':
 			CloseHandle(hNamedPipe);

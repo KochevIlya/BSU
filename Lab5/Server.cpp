@@ -2,6 +2,9 @@
 #include <iostream>
 #include <string>
 #include "Header.h";
+#include <fstream>;
+
+#pragma warning (disable : 4996)
 using namespace std;
 
 struct employee
@@ -27,13 +30,14 @@ struct Command
 	}
 };
 
-
-char c; // служебный символ
+char c;
+char* tempStr;// служебный символ
 SECURITY_ATTRIBUTES sa; // атрибуты защиты
 SECURITY_DESCRIPTOR sd; // дескриптор защиты
 STARTUPINFO startupInfo;
 DWORD dwBytesRead; // для числа прочитанных байтов
-char lpszOutMessage[] = "The server has received a message."; // обратное сообщение
+char OutMessage[80]; // обратное сообщение
+char InMessage[80];
 DWORD dwBytesWrite; // для числа записанных байтов
 int processAmount;
 PROCESS_INFORMATION processInfo;
@@ -41,9 +45,42 @@ HANDLE* processHandles;
 const wchar_t* pipeNameBase = L"\\\\.\\pipe\\demo_pipe";
 HANDLE* hNamedPipes;
 HANDLE* hThreads;
+std::string fileName;
+ifstream IFile;
+ofstream OFile;
+int notesAmmount;	
 
+int prepearingFiles()
+{
+	std::cout << "Enter the Input file name: ";
+	std::cin >> fileName;
+	IFile = ifstream(fileName, std::ios::binary);
+	OFile = ofstream(fileName, std::ios::binary);
+	std::cout << "Enter the ammount of employees: ";
+	std::cin >> notesAmmount;
+	for (int i = 0; i < notesAmmount; i++)
+	{
+		employee temp = employee();
+		temp.id = i;
+		std::cout << "Enter the Data\n";
+		std::cout << "ID: " << i << "\n";
+		std::cout << "Name: ";
+		std::cin >> temp.name;
+		std::cout << "Hours: ";
+		std::cin >> temp.hours;
+		OFile.write((char*)&temp, sizeof(employee));
+	}
+	OFile.close();
 
-
+	for (int i = 0; i < notesAmmount; i++)
+	{
+		employee temp = employee();
+		IFile.read((char*)&temp, sizeof(employee));
+		std::cout << temp.id << " " << temp.hours << " " << temp.name << "\n";
+	}
+	IFile.close();
+	return 0;
+}
 
 int creatingPipe()
 {
@@ -51,7 +88,6 @@ int creatingPipe()
 	for (int i = 0; i < processAmount; i++)
 	{
 		std::wstring pipeName = pipeNameBase + std::to_wstring(i);
-		std::wcout << pipeName << "\n";
 		hNamedPipes[i] = CreateNamedPipe(
 			pipeName.c_str(), // имя канала
 			PIPE_ACCESS_DUPLEX, // читаем из канала и пишем в канал
@@ -122,26 +158,30 @@ int creatingThreads()
 	hThreads = new HANDLE[processAmount];
 	for (int i = 0; i < processAmount; i++)
 	{
-		std::cout << "Creating Thread\n";
 		hThreads[i] = CreateThread(&sa, 0, (LPTHREAD_START_ROUTINE)processingThread, (void*)i, 0, &IDThreads[i]);
 	}
 	return 0;
 }
 
-int readingMessage(HANDLE hNamedPipe)
+int readingMessage(HANDLE hNamedPipe, char* inMessage)
 {
+
 	if (!ReadFile(
 
 		hNamedPipe, // дескриптор канала
-		lpszInMessage, // адрес буфера для ввода данных
-		sizeof(lpszInMessage), // число читаемых байтов
+		inMessage, // адрес буфера для ввода данных
+		sizeof(InMessage), // число читаемых байтов
 		&dwBytesRead, // число прочитанных байтов
 		(LPOVERLAPPED)NULL // передача данных синхронная
 	))
 	{
+		if (GetLastError() == 109)
+		{
+			std::cout << "One process Closed\n";
+			return 1;
+		}
 		cerr << "Data reading from the named pipe failed." << endl
 			<< "The last error code: " << GetLastError() << endl;
-
 		CloseHandle(hNamedPipe);
 		std::cout << "Press any char to finish the server: ";
 		std::cin >> c;
@@ -152,11 +192,13 @@ int readingMessage(HANDLE hNamedPipe)
 
 int writingMessage(HANDLE hNamedPipe)
 {
+	std::cout << "IN Message writing\n";
+
 	if (!WriteFile(
 
 		hNamedPipe, // дескриптор канала
-		lpszOutMessage, // адрес буфера для вывода данных
-		sizeof(lpszOutMessage), // число записываемых байтов
+		OutMessage, // адрес буфера для вывода данных
+		sizeof(OutMessage), // число записываемых байтов
 		&dwBytesWrite, // число записанных байтов
 		(LPOVERLAPPED)NULL // передача данных синхронная
 	))
@@ -168,22 +210,48 @@ int writingMessage(HANDLE hNamedPipe)
 		std::cin >> c;
 		return 1;
 	}
+	std::cout << "Message writed\n";
 	return 0;
 }
 
-int requestProcessing()
+int requestProcessing(char* inMessage, int& index)
 {
+	std::string str = inMessage;
 
+	switch (inMessage[0])
+	{
+	case '1':
+		str = str.substr(2);
+		index = stoi(str);
+		break;
+	case '2':
+		str = str.substr(2);
+		index = stoi(str);
+		break;
+	default:
+		return 1;
+	}
 	return 0;
+
 }
 
+int processRequest(int& index)
+{
+	std::cout << "In process Request\n";
+	employee temp = employee();
+	IFile.open(fileName, std::ios::binary);
+	IFile.seekg(index * sizeof(employee));
 
+	IFile.read((char*)&temp, sizeof(employee));
+	std::string str = "ID: " + std::to_string(temp.id) + " Name: " + temp.name + " Hours: " + std::to_string(temp.hours);
+	strcpy(OutMessage, str.c_str());
+	std::cout << OutMessage << "\n";
+	IFile.close();
+	return 0;
+}
 
 int main()
 {
-	
-
-	
 	// инициализация атрибутов защиты
 	sa.nLength = sizeof(sa);
 	sa.bInheritHandle = FALSE; // дескриптор канала ненаследуемый
@@ -194,6 +262,10 @@ int main()
 	// устанавливаем атрибуты защиты, разрешая доступ всем пользователям
 	SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
 	sa.lpSecurityDescriptor = &sd;
+
+	if (prepearingFiles() == 1)
+		return 0;
+	
 
 	// создаем именованный канал для чтения
 	std::cout << "Enter the amount of procces Clients: ";
@@ -206,18 +278,23 @@ int main()
 	if (creatingProcess() == 1)
 		return 0;
 
-	std::cout << "Connected\n";
 	if (creatingThreads() == 1)
 		return 0;
+
+	std::cout << "Connected\n";
 	WaitForMultipleObjects(processAmount, hThreads, TRUE, INFINITE);
 	std::cout << "CLosing the Threads\n";
+
+
 	// закрываем дескриптор канала
 	for (int i = 0; i < processAmount; i++)
 	{
 		CloseHandle(hNamedPipes[i]);
 	}
+
 	// завершаем процесс
 	std::cout << "Press any char to finish the server: ";
 	std::cin >> c;
+	
 	return 0;
 }
