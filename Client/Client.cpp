@@ -186,12 +186,13 @@ int main(int argc, char* argv[])
 		{	
 			// пишем в именованный канал
 		case '1':
-			std::cout << "Enter the id of Employee that you want to change: ";
+			std::cout << "Enter the id of Employee that you want to read: ";
 			std::cin >> id;
 			if (createRequest(1, id) == 1)
 				return 0;
 			if (writingMessage() == 1)
 				return 0;
+			std::cout << "Waiting for Server response...\n";
 			if (readingMessage() == 1)
 				return 0;
 			employee temp = employee();
@@ -202,9 +203,21 @@ int main(int argc, char* argv[])
 			std::cin >> temp.name;
 			std::cout << "Hours: ";
 			std::cin >> temp.hours;
+
 			if (sendEmployee(temp) == 1)
 				return 0;
+			if (readingMessage() == 1)
+				return 0; 
+			c = '0';
+			while (c != '1') {
+				std::cout << "Enter 1 to confirm that you read information\n";
+				cin >> c;
+			}
 
+			if (writingMessage() == 1)
+				return 0;
+			if (readingMessage() == 1)
+				return 0;
 			break;
 		// читаем из именованного канала
 		case '2':
@@ -216,14 +229,23 @@ int main(int argc, char* argv[])
 				return 0;
 			if (writingMessage() == 1)
 				return 0;
+
+			std::cout << "Waiting for Server response...\n";
 			if (readingMessage() == 1)
 				return 0;
 
 			// выводим полученное сообщение на консоль
 			cout << "The client has received the following message from a server: "
 				<< endl << "\t" << lpszInMessage << endl;
+			while (c != '1') {
+				std::cout << "Enter 1 to confirm that you read information\n";
+				cin >> c;
+			}
 
-			
+			if (writingMessage() == 1)
+				return 0;
+			if (readingMessage() == 1)
+				return 0;
 			
 			break;
 		case '3':
