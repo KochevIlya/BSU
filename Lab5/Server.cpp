@@ -30,6 +30,7 @@ struct Command
 	}
 };
 
+std::string path = "C:\\OS\\Lab5\\Lab5\\bin.bin";
 char c;
 char* tempStr;// служебный символ
 SECURITY_ATTRIBUTES sa; // атрибуты защиты
@@ -54,7 +55,6 @@ int prepearingFiles()
 {
 	std::cout << "Enter the Input file name: ";
 	std::cin >> fileName;
-	IFile = ifstream(fileName, std::ios::binary);
 	OFile = ofstream(fileName, std::ios::binary);
 	std::cout << "Enter the ammount of employees: ";
 	std::cin >> notesAmmount;
@@ -70,7 +70,9 @@ int prepearingFiles()
 		std::cin >> temp.hours;
 		OFile.write((char*)&temp, sizeof(employee));
 	}
+	//OFile.flush();
 	OFile.close();
+	IFile = ifstream(fileName, std::ios::binary);
 
 	for (int i = 0; i < notesAmmount; i++)
 	{
@@ -216,6 +218,7 @@ int writingMessage(HANDLE hNamedPipe)
 
 int requestProcessing(char* inMessage, int& index)
 {
+	std::cout << "In request Processing\n";
 	std::string str = inMessage;
 
 	switch (inMessage[0])
@@ -223,30 +226,77 @@ int requestProcessing(char* inMessage, int& index)
 	case '1':
 		str = str.substr(2);
 		index = stoi(str);
-		break;
+		std::cout << "In case 1, index = " << index << " in Meesage = " << str << "\n";
+		return 0;
 	case '2':
 		str = str.substr(2);
 		index = stoi(str);
-		break;
+		std::cout << "In case 2, index = " << index << " " << str << "\n";
+		return 2;
 	default:
+		std::cout << "Wrong Request in Server\n";
 		return 1;
 	}
-	return 0;
-
 }
 
-int processRequest(int& index)
+int readRequest(int& index)
 {
-	std::cout << "In process Request\n";
 	employee temp = employee();
 	IFile.open(fileName, std::ios::binary);
 	IFile.seekg(index * sizeof(employee));
-
 	IFile.read((char*)&temp, sizeof(employee));
 	std::string str = "ID: " + std::to_string(temp.id) + " Name: " + temp.name + " Hours: " + std::to_string(temp.hours);
 	strcpy(OutMessage, str.c_str());
-	std::cout << OutMessage << "\n";
+
 	IFile.close();
+	return 0;
+}
+
+int modifyRequest(int& index, HANDLE hPipe)
+{
+	writingMessage(hPipe);
+	std::cout << "in modify Request after writing Message\n";
+	readingMessage(hPipe, InMessage);
+	//std::cout << "Readed mesage from Client: " << InMessage << "\n";
+	std::string str = InMessage;
+	std::string strId = str.substr(0, str.find(' '));
+	//std::cout << "Parsed strId: " << strId << "\n";
+	std::string strNameHours = str.substr(str.find(' ') + 1);
+	//std::cout << "Parsed strNameHours: " << strNameHours << "\n";
+	std::string strName = strNameHours.substr(0, strNameHours.find(' '));
+	//std::cout << "Parsed strName: " << strName << "\n";
+	
+	std::string strHours = strNameHours.substr(strNameHours.find(' ') + 1);
+	
+	std::cout<< "Parsed inMessage: " << strId + " " + strName + " " + strHours + "\n";
+
+	employee temp = employee();
+	temp.id = stoi(strId);
+	temp.hours = stod(strHours);
+	strcpy(temp.name, strName.c_str());
+	std::cout << "After copying in employee\n";
+	/*if (OFile.fail()) {
+		std::cerr << "Error opening file for modification. Details: " << strerror(errno) << std::endl;
+		return 1;
+	}*/
+	if (!OFile.is_open())
+	{
+		std::cerr << "File is not open: " << strerror(errno) << "\n";
+	}
+
+	std::cout << "Id: " << temp.id << temp.name << temp.hours <<"\n";
+	std::cout << fileName << "\n";
+	ofstream OFile;
+	OFile = ofstream(fileName, std::ios::binary);
+	if (!OFile.is_open())
+	{
+		std::cerr << "File is not open: " << strerror(errno) << "\n";
+	}
+	std::cout << "After opening file\n";
+	OFile.seekp(temp.id * sizeof(employee));
+	OFile.write((char*)&temp, sizeof(employee));
+	OFile.close();
+
 	return 0;
 }
 

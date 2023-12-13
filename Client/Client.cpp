@@ -46,7 +46,6 @@ using namespace std;
 int pipeConnecting()
 {
 	std::wstring pipeName = L"\\\\.\\pipe\\demo_pipe" + std::to_wstring(index);
-	std::wcout << pipeName<< "\n";
 	hNamedPipe = CreateFile(
 		pipeName.c_str(), // имя канала
 		GENERIC_READ | GENERIC_WRITE, // читаем и записываем в канал
@@ -88,6 +87,32 @@ int writingMessage()
 		CloseHandle(hNamedPipe);
 		return 1;
 	}
+	return 0;
+}
+
+int sendEmployee(employee& temp)
+{
+	std::string str = std::to_string(temp.id) + " " + temp.name + " " + std::to_string(temp.hours);
+	
+	strcpy(lpszOutMessage, str.c_str());
+	if (!WriteFile(
+		hNamedPipe, // дескриптор канала
+		lpszOutMessage, // данные
+		sizeof(lpszOutMessage), // размер данных
+		&dwBytesWritten, // количество записанных байтов
+		(LPOVERLAPPED)NULL // синхронная запись
+	))
+	{
+
+		// ошибка записи
+		cerr << "Writing to the named pipe failed: " << endl
+			<< "The last error code: " << GetLastError() << endl;
+		cout << "Press any char to finish the client: ";
+		cin >> c;
+		CloseHandle(hNamedPipe);
+		return 1;
+	}
+	std::cout << "Message sent after working sendEmployee: " << str << "\n";
 	return 0;
 }
 
@@ -169,10 +194,18 @@ int main(int argc, char* argv[])
 				return 0;
 			if (readingMessage() == 1)
 				return 0;
+			employee temp = employee();
+			temp.id = id;
+			std::cout << "Enter the data, that you want to modify:\n ";
+			std::cout << "ID: " << id << "\n";
+			std::cout << "Name: ";
+			std::cin >> temp.name;
+			std::cout << "Hours: ";
+			std::cin >> temp.hours;
+			if (sendEmployee(temp) == 1)
+				return 0;
+
 			break;
-		
-
-
 		// читаем из именованного канала
 		case '2':
 			std::cout << "Enter the id of Employee that you want to read: ";
@@ -190,6 +223,8 @@ int main(int argc, char* argv[])
 			cout << "The client has received the following message from a server: "
 				<< endl << "\t" << lpszInMessage << endl;
 
+			
+			
 			break;
 		case '3':
 			CloseHandle(hNamedPipe);
