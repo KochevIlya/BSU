@@ -213,7 +213,6 @@ int writingMessage(HANDLE hNamedPipe)
 	std::cout << "IN Message writing\n";
 	std::cout << OutMessage << "\n";
 	if (!WriteFile(
-
 		hNamedPipe, // дескриптор канала
 		OutMessage, // адрес буфера для вывода данных
 		sizeof(OutMessage), // число записываемых байтов
@@ -258,6 +257,7 @@ int requestProcessing(char* inMessage)
 int readRequest()
 {
 	employee temp = employee();
+	ifstream IFile;
 	IFile.open(fileName, std::ios::binary);
 	IFile.seekg(index * sizeof(employee));
 	IFile.read((char*)&temp, sizeof(employee));
@@ -301,7 +301,7 @@ int modifyRequest(HANDLE hPipe)
 	std::cout << "Id: " << temp.id << temp.name << temp.hours <<"\n";
 	std::cout << fileName << "\n";
 	ofstream OFile;
-	OFile = ofstream(fileName, std::ios::binary);
+	OFile = ofstream(fileName, std::ios::binary | std::ios::app);
 	if (!OFile.is_open())
 	{
 		std::cerr << "File is not open: " << strerror(errno) << "\n";
@@ -310,8 +310,8 @@ int modifyRequest(HANDLE hPipe)
 	OFile.seekp(temp.id * sizeof(employee));
 	OFile.write((char*)&temp, sizeof(employee));
 	OFile.close();
-
 	return 0;
+
 }
 
 int main()
@@ -356,6 +356,7 @@ int main()
 	for (int i = 0; i < processAmount; i++)
 	{
 		CloseHandle(hNamedPipes[i]);
+		CloseHandle(hSemaphores[i]);
 	}
 	std::cout << "Press any char to finish the server: ";
 	std::cin >> c;

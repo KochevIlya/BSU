@@ -59,17 +59,18 @@ int processingThread(int i)
 		}
 		else if (desicion == 0)
 		{
-			WaitForMultipleObjects(notesAmmount, hSemaphores, TRUE, INFINITE);
+			for(int i = 0; i < processAmount; i++)
+				WaitForSingleObject(hSemaphores[index], INFINITE);
 			strcpy(OutMessage, inMessage);
-			writingMessage(hNamedPipes[index]);
-			readingMessage(hNamedPipes[index], InMessage);
+			writingMessage(hNamedPipes[i]);
+			readingMessage(hNamedPipes[i], InMessage);
 			std::cout << "In case, when desicion = 0\n";
 			if (modifyRequest(hNamedPipes[i]) == 1)
 				return 0;
 			std::cout << "After Modifying\n";
-			writingMessage(hNamedPipes[index]);
-			readingMessage(hNamedPipes[index], InMessage);
-			writingMessage(hNamedPipes[index]);
+			writingMessage(hNamedPipes[i]);
+			readingMessage(hNamedPipes[i], InMessage);
+			writingMessage(hNamedPipes[i]);
 			LONG ReleaseCount;
 			ReleaseSemaphore(hSemaphores[index], processAmount, &ReleaseCount);
 		}

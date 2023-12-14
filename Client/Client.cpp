@@ -126,13 +126,12 @@ int readingMessage()
 		(LPOVERLAPPED)NULL // синхронная запись
 	))
 	{
-
 		// ошибка записи
 		cerr << "Reading to the named pipe failed: " << endl
 			<< "The last error code: " << GetLastError() << endl;
 		cout << "Press any char to finish the client: ";
 		cin >> c;
-
+		
 		CloseHandle(hNamedPipe);
 		return 1;
 	}
@@ -186,7 +185,7 @@ int main(int argc, char* argv[])
 		{	
 			// пишем в именованный канал
 		case '1':
-			std::cout << "Enter the id of Employee that you want to read: ";
+			std::cout << "Enter the id of Employee that you want to change: ";
 			std::cin >> id;
 			if (createRequest(1, id) == 1)
 				return 0;
@@ -209,6 +208,7 @@ int main(int argc, char* argv[])
 			if (readingMessage() == 1)
 				return 0; 
 			c = '0';
+			std::cout << "now c: " << c << "\n";
 			while (c != '1') {
 				std::cout << "Enter 1 to confirm that you read information\n";
 				cin >> c;
@@ -237,6 +237,7 @@ int main(int argc, char* argv[])
 			// выводим полученное сообщение на консоль
 			cout << "The client has received the following message from a server: "
 				<< endl << "\t" << lpszInMessage << endl;
+			c = '0';
 			while (c != '1') {
 				std::cout << "Enter 1 to confirm that you read information\n";
 				cin >> c;
